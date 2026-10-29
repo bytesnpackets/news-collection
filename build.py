@@ -124,7 +124,9 @@ def ask_claude(pool, sections, w, g):
         "Pick the most important stories per section (skip opinion, celebrity, crime gore, and pure scare stories "
         "unless truly major). Rewrite each as 2-3 short, calm, plain Burmese sentences. No alarming words, no "
         "exaggeration, no clickbait, add nothing not in the source, and say plainly when something is unconfirmed. "
-        "Never repeat a story across sections. Also write one short Burmese weather line for Yangon from the data "
+        "Never repeat a story across sections. When stories are about equally important, spread the picks across "
+        "different outlets within a section instead of favouring one (if several outlets cover the same story, "
+        "keep just one). Also write one short Burmese weather line for Yangon from the data "
         "(mention if a warning is true and what it means), and one short Burmese gold line (say it is an approximate "
         "world-market price per ကျပ်သား (the Burmese gold weight unit; use exactly that word) and whether it moved). "
         'Reply with JSON only: {"weather": str, "gold": str, "stories": {"<section>": [{"id": str, "text": str}]}}'
