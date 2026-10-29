@@ -119,7 +119,7 @@ def ask_claude(pool, sections, w, g):
         "exaggeration, no clickbait, add nothing not in the source, and say plainly when something is unconfirmed. "
         "Never repeat a story across sections. Also write one short Burmese weather line for Yangon from the data "
         "(mention if a warning is true and what it means), and one short Burmese gold line (say it is an approximate "
-        "world-market price per kyat-thar and whether it moved). "
+        "world-market price per ကျပ်သား (the Burmese gold weight unit; use exactly that word) and whether it moved). "
         'Reply with JSON only: {"weather": str, "gold": str, "stories": {"<section>": [{"id": str, "text": str}]}}'
     )
     user = f"WEATHER: {json.dumps(w)}\nGOLD: {json.dumps(g)}\n\nSTORIES:\n" + "\n".join(lines)
