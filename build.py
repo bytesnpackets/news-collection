@@ -125,7 +125,7 @@ def ask_claude(pool, sections, w, g):
     resp = json.loads(get("https://api.anthropic.com/v1/messages", body, {
         "x-api-key": os.environ["ANTHROPIC_API_KEY"], "anthropic-version": "2023-06-01",
         "content-type": "application/json"}, timeout=300))  # Burmese output is slow to generate
-    text = resp["content"][0]["text"]
+    text = "".join(b["text"] for b in resp["content"] if b.get("type") == "text")
     return json.loads(text[text.index("{"): text.rindex("}") + 1])
 
 
