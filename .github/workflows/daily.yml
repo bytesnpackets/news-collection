@@ -2,6 +2,7 @@ name: daily-news
 on:
   schedule:
     - cron: "30 22 * * *" # 05:00 Yangon
+    - cron: "30 10 * * *" # 17:00 Yangon
   workflow_dispatch:
 permissions:
   contents: write

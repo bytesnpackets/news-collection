@@ -31,7 +31,10 @@ FEEDS = {
         ("The Guardian", "https://www.theguardian.com/uk/rss"),
         ("The Independent", "https://www.independent.co.uk/news/uk/rss"),
     ],
-    "singapore": [("The Straits Times", "https://www.straitstimes.com/news/singapore/rss.xml")],
+    "singapore": [
+        ("The Straits Times", "https://www.straitstimes.com/news/singapore/rss.xml"),
+        ("CNA", "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=10416"),
+    ],
     "politics": [
         ("BBC", "https://feeds.bbci.co.uk/news/politics/rss.xml"),
         ("The Guardian", "https://www.theguardian.com/politics/rss"),
@@ -40,6 +43,7 @@ FEEDS = {
         ("BBC မြန်မာ", "https://feeds.bbci.co.uk/burmese/rss.xml"),  # keep name == BURMESE_SOURCE
         ("BBC", "https://feeds.bbci.co.uk/news/world/rss.xml"),
         ("The Guardian", "https://www.theguardian.com/world/rss"),
+        ("Al Jazeera", "https://www.aljazeera.com/xml/rss/all.xml"),
     ],
 }
 BURMESE_SOURCE = "BBC မြန်မာ"  # already Burmese, so its links skip translation
