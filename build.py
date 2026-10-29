@@ -10,6 +10,8 @@ import html
 import json
 import os
 import sys
+import urllib.error
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
@@ -35,11 +37,12 @@ FEEDS = {
         ("The Guardian", "https://www.theguardian.com/politics/rss"),
     ],
     "world": [
-        ("BBC မြန်မာ", "https://feeds.bbci.co.uk/burmese/rss.xml"),
+        ("BBC မြန်မာ", "https://feeds.bbci.co.uk/burmese/rss.xml"),  # keep name == BURMESE_SOURCE
         ("BBC", "https://feeds.bbci.co.uk/news/world/rss.xml"),
         ("The Guardian", "https://www.theguardian.com/world/rss"),
     ],
 }
+BURMESE_SOURCE = "BBC မြန်မာ"  # already Burmese, so its links skip translation
 YANGON = (16.8661, 96.1951)
 KYAT_THAR_G = 16.329  # one Burmese gold "kyat-thar" in grams
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
@@ -135,6 +138,14 @@ def ask_claude(pool, sections, w, g):
     return json.loads(text[text.index("{"): text.rindex("}") + 1])
 
 
+def translated(url):
+    """Link that opens the article through Google's translate proxy (host.com -> host-com.translate.goog)."""
+    p = urllib.parse.urlsplit(url)
+    host = p.netloc.replace("-", "--").replace(".", "-") + ".translate.goog"
+    q = (p.query + "&" if p.query else "") + "_x_tr_sl=auto&_x_tr_tl=my&_x_tr_hl=my"
+    return urllib.parse.urlunsplit(("https", host, p.path, q, p.fragment))
+
+
 def render(out, pool, now):
     def card(text, extra=""):
         return f'<div class="c">{html.escape(text)}{extra}</div>'
@@ -145,7 +156,8 @@ def render(out, pool, now):
         for s in out["stories"].get(sec, []):
             it = pool.get(s["id"])  # unknown ids are dropped so links can never be invented
             if it:
-                link = f' <a href="{html.escape(it["link"])}">{html.escape(it["source"])} ›</a>'
+                href = it["link"] if it["source"] == BURMESE_SOURCE else translated(it["link"])
+                link = f' <a href="{html.escape(href)}">{html.escape(it["source"])} ›</a>'
                 cards.append(card(s["text"], link))
         if cards:
             parts.append(f'<h2>{TITLES[sec]}</h2>' + "".join(cards))
