@@ -47,8 +47,11 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
 
 def get(url, data=None, headers=None, timeout=30):
     req = urllib.request.Request(url, data=data, headers={"User-Agent": "calm-news/1.0", **(headers or {})})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        raw = r.read()
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            raw = r.read()
+    except urllib.error.HTTPError as e:  # show the API's reason, not just the status
+        raise RuntimeError(f"{e.code} from {url}: {e.read()[:500]!r}") from None
     return gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw  # some feeds gzip unasked
 
 
@@ -120,12 +123,15 @@ def ask_claude(pool, sections, w, g):
         'Reply with JSON only: {"weather": str, "gold": str, "stories": {"<section>": [{"id": str, "text": str}]}}'
     )
     user = f"WEATHER: {json.dumps(w)}\nGOLD: {json.dumps(g)}\n\nSTORIES:\n" + "\n".join(lines)
-    body = json.dumps({"model": MODEL, "max_tokens": 8000, "system": system,
+    body = json.dumps({"model": MODEL, "max_tokens": 8000, "system": system, "thinking": {"type": "disabled"},
                        "messages": [{"role": "user", "content": user}]}).encode()
     resp = json.loads(get("https://api.anthropic.com/v1/messages", body, {
         "x-api-key": os.environ["ANTHROPIC_API_KEY"], "anthropic-version": "2023-06-01",
         "content-type": "application/json"}, timeout=300))  # Burmese output is slow to generate
     text = "".join(b["text"] for b in resp["content"] if b.get("type") == "text")
+    if "{" not in text:
+        raise RuntimeError(f"no JSON in reply: stop_reason={resp.get('stop_reason')} "
+                           f"blocks={[b.get('type') for b in resp['content']]} text={text[:300]!r}")
     return json.loads(text[text.index("{"): text.rindex("}") + 1])
 
 
