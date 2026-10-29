@@ -45,9 +45,9 @@ KYAT_THAR_G = 16.329  # one Burmese gold "kyat-thar" in grams
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
 
 
-def get(url, data=None, headers=None):
+def get(url, data=None, headers=None, timeout=30):
     req = urllib.request.Request(url, data=data, headers={"User-Agent": "calm-news/1.0", **(headers or {})})
-    with urllib.request.urlopen(req, timeout=30) as r:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
         raw = r.read()
     return gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw  # some feeds gzip unasked
 
@@ -120,11 +120,11 @@ def ask_claude(pool, sections, w, g):
         'Reply with JSON only: {"weather": str, "gold": str, "stories": {"<section>": [{"id": str, "text": str}]}}'
     )
     user = f"WEATHER: {json.dumps(w)}\nGOLD: {json.dumps(g)}\n\nSTORIES:\n" + "\n".join(lines)
-    body = json.dumps({"model": MODEL, "max_tokens": 4000, "system": system,
+    body = json.dumps({"model": MODEL, "max_tokens": 8000, "system": system,
                        "messages": [{"role": "user", "content": user}]}).encode()
     resp = json.loads(get("https://api.anthropic.com/v1/messages", body, {
         "x-api-key": os.environ["ANTHROPIC_API_KEY"], "anthropic-version": "2023-06-01",
-        "content-type": "application/json"}))
+        "content-type": "application/json"}, timeout=300))  # Burmese output is slow to generate
     text = resp["content"][0]["text"]
     return json.loads(text[text.index("{"): text.rindex("}") + 1])
 
